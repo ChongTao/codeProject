@@ -1,4 +1,4 @@
-## 1 变量
+# 1 变量
 
 Go语言是静态类型，变量声明时必须指定变量的类型，以及变量一定要使用。Go 语言与其他语言显著不同的一个地方在于，Go 语言的类型在变量后面。
 
@@ -9,7 +9,7 @@ var a = 1 // 声明时赋值，推断类型
 a := 1 // 自动推断类型
 ```
 
-### 1.1 常见的类型
+## 1.1 常见的类型
 
 | 类型          | 长度(字节) | 默认值 | 说明                                      |
 | ------------- | ---------- | ------ | ----------------------------------------- |
@@ -35,15 +35,322 @@ a := 1 // 自动推断类型
 | interface     |            | nil    | 接口                                      |
 | function      |            | nil    | 函数                                      |
 
-### 1.2 字符串
+## 1.2 字符串
+
+在 Go 语言中，字符串使用 UTF8 编码。
+
+```go
+str := "golang"
+```
+
+## 1.3 数组
+
+```go
+var arr [5]int // 声明数组
+
+var arr1 = [5]int{1,2,3,4,5} // 声明并初始化
+arr1 := [5]int{1,2,3,4,5} // 声明并初始化
+```
+
+数组的遍历
+
+```go
+var arr = [5]int{1,2,3,4,5}
+for i := 0 i < len(arr); i++ {
+    fmt.Println(arr[i])
+}
+```
+
+> 注意数组的长度不能改变，如果想要对数组操作，需要使用切片。
+
+## 1.4 切片
+
+切片使用数组作为底层结构。切片包含三个组件：容量，长度和指向底层数组的指针,切片可以随时进行扩展
+
+```go
+slice := make([]int, 0) // 长度为0的切片
+slice1 := make([]int, 3, 5) // 长度为3容量为5的切片
+
+// 切片添加元素
+slice1 = append(slice1, 1, 2, 3)
+fmt.Println(len(slice1), cap(slice1))
+
+// 子切片
+sub := slice1[3:]
+```
+
+> 声明切片时可以指定容量大小，预分配空间。如果容量不够，切片自动扩容。
+
+## 1.5 map
+
+map式一种存储键值对的数据结构。
+
+```go
+m1 := make(map[string]int) // 声明 key是string类型，value是int类型
+m2 := map[string]string{     // 声明并且初始化
+    "name": "jack",
+    "sex": "female",
+}
+```
+
+## 1.6 指针
+
+指针即某个值的地址，类型定义时使用符号*，对已经存在变量使用&获取该变量的地址。
+
+```go
+str := "hello"
+var p *string = &str
+*p = "World"
+```
+
+指针通常在函数传递参数，或者给某个类型定义新的方法时使用。在Go语言中，参数是按值传递的，如果不使用指针，函数内部将会拷贝一份参数的副本，对参数的修改并不会影响到外部变量的值。如果参数使用指针，对参数的传递将会影响到外部变量。
+
+# 2 流程控制
+
+## 2.1 条件语句
+
+```go
+age := 18
+if age < 18 {
+    fmt.Println("kid")
+} else {
+    fmt.Println("Adult")
+}
+```
+
+## 2.2 switch
+
+```go
+type Gender int8
+
+const {
+    MALE Gender = 1
+    FEMALE Gender = 2
+}
+
+gender := MALE
+
+switch gender {
+    case FEMALE:
+    	fmt.Println("female")
+    case MALE:
+    	fmt.Println("male")
+    default:
+	    fmt.Println("unknown")
+}
+```
+
+## 2.3 for循环
+
+```go
+sum := 0
+for i := 0; i < 10; i++ {
+    if sum > 10 {
+        break
+    }
+    sum += i
+}
+```
 
 
 
-### 1.3 数组
+# 3 函数
+
+## 3.1 参数与返回值
+
+函数使用关键字func，参数和返回值可以有多个，其中main是程序的入口。
+
+```go
+func funcName(param1 Type1, param2 Type2, ...)(return1 Type3,...) {
+    
+}
+```
+
+示例
+
+```go
+func add(num1 int, num2 int) int {
+	return num1 + num2
+}
+
+func main() {
+	ans := add(1, 3)
+	fmt.Println(ans)
+}
+```
+
+## 3.2 错误处理
+
+在函数中出现不能处理的错误，返回给调用者处理，使用error记录错误信息。
+
+```go
+func main() {
+    _,err := os.Open("filename.txt")
+    if err != nil {
+        fmt.Println(err)
+    }
+}
+```
+
+通过errors.New返回自定义错误
+
+```go
+func hello(name string) error {
+	if name == "" {
+		return errors.New("error: name is empty")
+	}
+
+	fmt.Println("Hello " + name)
+	return nil
+}
+
+func main() {
+	if err := hello(""); err == nil {
+		fmt.Println("error")
+	}
+}
+```
+
+error是能够预知的错误，但是也可能出现不可预知的错误，例如数组越界，空指针等，这种错误可能导致程序非正常退出，在Go语言中称为panic。
+
+```go
+func get(index int) int {
+	arr := [3]int{2, 3, 4}
+	return arr[index]
+}
+
+func main() {
+	fmt.Println(get(5))
+	fmt.Println("finished")
+}
+```
+
+Go 语言使用defer和recover进行捕获和恢复。
+
+```go
+func process(index int) (ret int) {
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println("arr index out")
+			ret = -1
+		}
+	}()
+
+	nums := [3]int{1, 2, 3}
+	return nums[index]
+}
+
+func main() {
+	fmt.Println(process(42))
+}
+```
+
+# 4 结构体、方法和接口
+
+## 4.1 结构体和方法
+
+go的结构体类似Java的class，在结构体中可以定义多个字段，方法等。
+
+```go
+type Student struct {
+	name string
+	age  int
+}
+
+func (stu *Student) hello(person string) string {
+	return fmt.Sprintf("hello %s, I am %s", person, stu.name)
+}
+
+func main() {
+	stu := &Student{
+		name: "Jack",
+	}
+
+	msg := stu.hello("Rose")
+	fmt.Println(msg)
+}
+```
+
+此外也可以使用new实例化：
+
+```go
+stu := new(Student)
+```
+
+## 4.2 接口
+
+在go语言中，接口定义一组方法的集合，接口不能被实例化，一个类型实现所有的方法。
+
+```go
+type Person interface {
+	getName() string
+}
+
+type Teacher struct {
+	name string
+	age  int
+}
+
+func (tea *Teacher) getName() string {
+	return tea.name
+}
+
+type Worker struct {
+	name string
+	age  int
+}
+
+func (work *Worker) getName() string {
+	return work.name
+}
+
+func main() {
+	var p Person = &Teacher{
+		name: "tom",
+		age:  28,
+	}
+
+	fmt.Println(p.getName())
+}
+```
+
+- Go语言中，不需要显示声明实现哪一个接口，只需要直接实现该接口的所有的方法。
+
+实例可以强制类型转换为接口，接口也可以强制类型转换成实例。
+
+```go
+func main() {
+    var p Person = &Worker {
+        name : "Tom",
+        age : 48,
+    }
+    
+    worker := p.(*Worker) // 接口转换为实例
+    fmt.Println(worker.getAge)
+}
+```
+
+### 4.2.1 空接口
+
+空接口是没有任何方法的接口，可以用该接口表示任意类型。
+
+```go
+func main() {
+	m := make(map[string]interface{})
+
+	m["name"] = "Go"
+	m["age"] = 18
+	fmt.Println(m)
+}
+```
+
+# 5 并发
+
+## 5.1 sync
+
+Go语言提供sync和channel两种方式支持协程的并发。
 
 
-
-### 1.4 切片
 
 
 
