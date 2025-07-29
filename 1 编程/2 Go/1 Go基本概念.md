@@ -105,6 +105,28 @@ var p *string = &str
 
 指针通常在函数传递参数，或者给某个类型定义新的方法时使用。在Go语言中，参数是按值传递的，如果不使用指针，函数内部将会拷贝一份参数的副本，对参数的修改并不会影响到外部变量的值。如果参数使用指针，对参数的传递将会影响到外部变量。
 
+## 1.7 枚举值
+
+通常使用常量来表示枚举值。
+
+```go
+tpye StuType int32
+
+const (
+	Type1 StuType = iota
+    Type2
+    Type3
+)
+
+func main() {
+    fmt.Println(Type1, Type2, Type3)
+}
+```
+
+
+
+
+
 # 2 流程控制
 
 ## 2.1 条件语句
@@ -245,6 +267,8 @@ func main() {
 }
 ```
 
+> go中无异常类型，只有错误类型。
+
 # 4 结构体、方法和接口
 
 ## 4.1 结构体和方法
@@ -350,7 +374,91 @@ func main() {
 
 Go语言提供sync和channel两种方式支持协程的并发。
 
+```go
+var wg sync.WaitGroup
 
+func download(url string) {
+	fmt.Println("start download...")
+	time.Sleep(time.Second * 3)
+	wg.Done()
+}
+
+func main() {
+	for i := 0; i < 3; i++ {
+		wg.Add(1)
+		go download("url" + string(rune(i+'0')))
+	}
+	wg.Wait()
+	fmt.Println("finish download")
+}
+```
+
+- wg.Add(1)：为 wg 添加一个计数，wg.Done()，减去一个计数。
+- go download()：启动新的协程并发执行 download 函数。
+- wg.Wait()：等待所有的协程执行结束。
+
+## 5.2 channel
+
+```go
+var ch = make(chan string, 10)
+
+func download(url string) {
+	fmt.Println("start to download", url)
+	time.Sleep(time.Second * 3)
+	ch <- url // 将URL发送信道
+}
+
+func main() {
+	for i := 0; i < 3; i++ {
+		go download("a.com" + string(rune(i+'0')))
+	}
+
+	for i := 0; i < 3; i++ {
+		msg := <-ch
+		fmt.Println("finish", msg)
+	}
+	fmt.Println("Done!")
+}
+```
+
+使用channel信道，可以在协程之间传递消息。
+
+# 6 单元测试
+
+假设我们希望测试 package main 下 `calc.go` 中的函数，要只需要新建 `calc_test.go` 文件，在`calc_test.go`中新建测试用例即可。
+
+```go
+package main
+
+func add(num1 int, num2 int) int {
+	return num1 + num2
+}
+```
+
+```go
+// calc_test.go
+package main
+
+import "testing"
+
+func TestAdd(t *testing.T) {
+	if ans := add(1, 2); ans != 3 {
+		t.Error("add(1, 2) should be equal to 3")
+	}
+}
+```
+
+# 7 包和模块
+
+## 7.1 Package
+
+一个文件夹可以作为package，同一个package内部变量、类型、方法等定义可见
+
+Go 语言也有 Public 和 Private 的概念，粒度是包。如果类型/接口/方法/函数/字段的首字母大写，则是 Public 的，对其他 package 可见，如果首字母小写，则是 Private 的，对其他 package 不可见。
+
+
+
+## 7.2 Modules
 
 
 
