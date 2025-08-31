@@ -1,1 +1,0 @@
-`context.WithCancel()` 创建可取消的 Context 对象，即可以主动通知子协程退出。
